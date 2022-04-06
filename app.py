@@ -46,7 +46,7 @@ model = load_model_from_config(config, f"txt2img-f8-large.ckpt")
 device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 model = model.to(device)
 
-def run(prompt, steps, width, height, images, scale, eta):
+def run(prompt, steps, width, height, images, scale):
     if images == 6:
         images = 3
         n_iter = 2
@@ -56,7 +56,7 @@ def run(prompt, steps, width, height, images, scale, eta):
         prompt = prompt, 
         outdir='latent-diffusion/outputs',
         ddim_steps = int(steps),
-        ddim_eta = eta,
+        ddim_eta = 0,
         n_iter = n_iter,
         W=int(width),
         H=int(height),
@@ -126,12 +126,11 @@ css = ".output-image{height: 528px !important} .output-carousel .output-image{he
 iface = gr.Interface(fn=run, inputs=[
     gr.inputs.Textbox(label="Prompt",default="A drawing of a cute dog with a funny hat"),
     gr.inputs.Slider(label="Steps - more steps can increase quality but will take longer to generate",default=50,maximum=250,minimum=1,step=1),
-    gr.inputs.Slider(label="Width", minimum=64, maximum=256, default=256, step=64),
-    gr.inputs.Slider(label="Height", minimum=64, maximum=256, default=256, step=64),
+    gr.inputs.Radio(label="Width", choices=[32,64,128,256,384],default=256),
+    gr.inputs.Radio(label="Height", choices=[32,64,128,256,384],default=256),
     gr.inputs.Slider(label="Images - How many images you wish to generate", default=4, step=2, minimum=2, maximum=6),
-    gr.inputs.Slider(label="Diversity scale - How different from one another you wish the images to be",default=5.0, minimum=1),
-    gr.inputs.Slider(label="ETA - between 0 and 1. Lower values can provide better quality, higher values can be more diverse",default=0.0,minimum=0.0, maximum=1.0,step=0.1),
-    
+    gr.inputs.Slider(label="Diversity scale - How different from one another you wish the images to be",default=5.0, minimum=1.0, maximum=50),
+    #gr.inputs.Slider(label="ETA - between 0 and 1. Lower values can provide better quality, higher values can be more diverse",default=0.0,minimum=0.0, maximum=1.0,step=0.1),
     ], 
     outputs=[image,gr.outputs.Carousel(label="Individual images",components=["image"])],
     css=css,
