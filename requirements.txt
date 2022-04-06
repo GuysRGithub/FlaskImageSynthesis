@@ -1,4 +1,4 @@
-git+https://github.com/CompVis/taming-transformers
+taming-transformers
 ftfy 
 regex 
 tqdm 
@@ -11,4 +11,3 @@ gradio
 torch
 torchvision
 Pillow
-
