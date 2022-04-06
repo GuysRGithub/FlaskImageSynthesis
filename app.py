@@ -125,11 +125,11 @@ image = gr.outputs.Image(type="pil", label="Your result")
 css = ".output-image{height: 528px !important} .output-carousel .output-image{height:272px !important}"
 iface = gr.Interface(fn=run, inputs=[
     gr.inputs.Textbox(label="Prompt - try adding increments to your prompt such as 'oil on canvas', 'a painting', 'a book cover'",default="The drawing of a dog wearing a funny hat"),
-    gr.inputs.Slider(label="Steps - more steps can increase quality but will take longer to generate",default=50,maximum=250,minimum=1,step=1),
-    gr.inputs.Radio(label="Width", choices=[32,64,128,256,384],default=256),
-    gr.inputs.Radio(label="Height", choices=[32,64,128,256,384],default=256),
-    gr.inputs.Slider(label="Images - How many images you wish to generate", default=4, step=2, minimum=2, maximum=6),
-    gr.inputs.Slider(label="Diversity scale - How different from one another you wish the images to be",default=5.0, minimum=1.0, maximum=50),
+    gr.inputs.Slider(label="Steps - more steps can increase quality but will take longer to generate",default=45,maximum=50,minimum=1,step=1),
+    gr.inputs.Radio(label="Width", choices=[32,64,128,256],default=256),
+    gr.inputs.Radio(label="Height", choices=[32,64,128,256],default=256),
+    gr.inputs.Slider(label="Images - How many images you wish to generate", default=2, step=1, minimum=1, maximum=4),
+    gr.inputs.Slider(label="Diversity scale - How different from one another you wish the images to be",default=5.0, minimum=1.0, maximum=15.0),
     #gr.inputs.Slider(label="ETA - between 0 and 1. Lower values can provide better quality, higher values can be more diverse",default=0.0,minimum=0.0, maximum=1.0,step=0.1),
     ], 
     outputs=[image,gr.outputs.Carousel(label="Individual images",components=["image"])],
