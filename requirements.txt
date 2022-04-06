@@ -11,5 +11,4 @@ gradio
 torch
 torchvision
 Pillow
-numpy
-imageio
+
