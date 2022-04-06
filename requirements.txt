@@ -1,0 +1,15 @@
+git+https://github.com/CompVis/taming-transformers
+ftfy 
+regex 
+tqdm 
+omegaconf 
+pytorch-lightning
+torch-fidelity
+transformers   
+einops
+gradio
+torch
+torchvision
+Pillow
+numpy
+imageio
