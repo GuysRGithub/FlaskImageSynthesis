@@ -42,7 +42,7 @@ def load_model_from_config(config, ckpt, verbose=False):
     return model
 
 config = OmegaConf.load("latent-diffusion/configs/latent-diffusion/txt2img-1p4B-eval.yaml")  # TODO: Optionally download from same location as ckpt and chnage this logic
-model = load_model_from_config(config, f"latent_diffusion_txt2img_f8_large.ckpt")  # TODO: check path
+model = load_model_from_config(config, f"txt2img-f8-large.ckpt")  # TODO: check path
 device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 model = model.to(device)
 
