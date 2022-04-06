@@ -1,4 +1,4 @@
-taming-transformers
+git+https://github.com/CompVis/taming-transformers.git#egg=taming-transformers
 ftfy 
 regex 
 tqdm 
