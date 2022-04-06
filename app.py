@@ -124,7 +124,7 @@ def run(prompt, steps, width, height, images, scale):
 image = gr.outputs.Image(type="pil", label="Your result")
 css = ".output-image{height: 528px !important} .output-carousel .output-image{height:272px !important}"
 iface = gr.Interface(fn=run, inputs=[
-    gr.inputs.Textbox(label="Prompt",default="A drawing of a cute dog with a funny hat"),
+    gr.inputs.Textbox(label="Prompt - try adding increments to your prompt such as 'oil on canvas', 'a painting', 'a book cover'",default="The drawing of a dog wearing a funny hat"),
     gr.inputs.Slider(label="Steps - more steps can increase quality but will take longer to generate",default=50,maximum=250,minimum=1,step=1),
     gr.inputs.Radio(label="Width", choices=[32,64,128,256,384],default=256),
     gr.inputs.Radio(label="Height", choices=[32,64,128,256,384],default=256),
