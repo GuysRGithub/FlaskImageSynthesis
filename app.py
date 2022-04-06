@@ -9,7 +9,7 @@ sys.path.append('./latent-diffusion')
 from taming.models import vqgan 
 from ldm.util import instantiate_from_config
 
-torch.hub.download_url_to_file('https://ommer-lab.com/files/latent-diffusion/nitro/txt2img-f8-large/model.ckpt','txt2img-f8-large.ckpt')
+#torch.hub.download_url_to_file('https://ommer-lab.com/files/latent-diffusion/nitro/txt2img-f8-large/model.ckpt','txt2img-f8-large.ckpt')
 
 #@title Import stuff
 import argparse, os, sys, glob
@@ -26,7 +26,7 @@ from ldm.models.diffusion.plms import PLMSSampler
 
 def load_model_from_config(config, ckpt, verbose=False):
     print(f"Loading model from {ckpt}")
-    pl_sd = torch.load(ckpt, map_location="cuda:0")
+    pl_sd = torch.load(ckpt, map_location="cuda")
     sd = pl_sd["state_dict"]
     model = instantiate_from_config(config.model)
     m, u = model.load_state_dict(sd, strict=False)
@@ -41,8 +41,8 @@ def load_model_from_config(config, ckpt, verbose=False):
     model.eval()
     return model
 
-config = OmegaConf.load("latent-diffusion/configs/latent-diffusion/txt2img-1p4B-eval.yaml")  # TODO: Optionally download from same location as ckpt and chnage this logic
-model = load_model_from_config(config, f"txt2img-f8-large.ckpt")  # TODO: check path
+config = OmegaConf.load("latent-diffusion/configs/latent-diffusion/txt2img-1p4B-eval.yaml")
+model = load_model_from_config(config, f"txt2img-f8-large.ckpt")
 device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 model = model.to(device)
 
