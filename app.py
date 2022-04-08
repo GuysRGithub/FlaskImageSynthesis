@@ -42,15 +42,62 @@ def load_model_from_config(config, ckpt, verbose=False):
     model.eval()
     return model
 
+def load_safety_model(clip_model):
+    """load the safety model"""
+    import autokeras as ak  # pylint: disable=import-outside-toplevel
+    from tensorflow.keras.models import load_model  # pylint: disable=import-outside-toplevel
+    from os.path import expanduser  # pylint: disable=import-outside-toplevel
+
+    home = expanduser("~")
+
+    cache_folder = home + "/.cache/clip_retrieval/" + clip_model.replace("/", "_")
+    if clip_model == "ViT-L/14":
+        model_dir = cache_folder + "/clip_autokeras_binary_nsfw"
+        dim = 768
+    elif clip_model == "ViT-B/32":
+        model_dir = cache_folder + "/clip_autokeras_nsfw_b32"
+        dim = 512
+    else:
+        raise ValueError("Unknown clip model")
+    if not os.path.exists(model_dir):
+        os.makedirs(cache_folder, exist_ok=True)
+
+        from urllib.request import urlretrieve  # pylint: disable=import-outside-toplevel
+
+        path_to_zip_file = cache_folder + "/clip_autokeras_binary_nsfw.zip"
+        if clip_model == "ViT-L/14":
+            url_model = "https://raw.githubusercontent.com/LAION-AI/CLIP-based-NSFW-Detector/main/clip_autokeras_binary_nsfw.zip"
+        elif clip_model == "ViT-B/32":
+            url_model = (
+                "https://raw.githubusercontent.com/LAION-AI/CLIP-based-NSFW-Detector/main/clip_autokeras_nsfw_b32.zip"
+            )
+        else:
+            raise ValueError("Unknown model {}".format(clip_model))
+        urlretrieve(url_model, path_to_zip_file)
+        import zipfile  # pylint: disable=import-outside-toplevel
+
+        with zipfile.ZipFile(path_to_zip_file, "r") as zip_ref:
+            zip_ref.extractall(cache_folder)
+
+    loaded_model = load_model(model_dir, custom_objects=ak.CUSTOM_OBJECTS)
+    loaded_model.predict(np.random.rand(10 ** 3, dim).astype("float32"), batch_size=10 ** 3)
+
+    return loaded_model
+
+def is_unsafe(safety_model, embeddings, threshold=0.5):
+    """find unsafe embeddings"""
+    nsfw_values = safety_model.predict(embeddings, batch_size=embeddings.shape[0])
+    x = np.array([e[0] for e in nsfw_values])
+    return True if x > threshold else False
+
 config = OmegaConf.load("latent-diffusion/configs/latent-diffusion/txt2img-1p4B-eval.yaml")
 model = load_model_from_config(config, f"txt2img-f8-large.ckpt")
 device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 model = model.to(device)
+
 #NSFW CLIP Filter
-clip_model, _, preprocess = open_clip.create_model_and_transforms('ViT-B-32-quickgelu', pretrained='laion400m_e32')
-text = tokenizer.tokenize(["NSFW", "adult content", "porn", "naked people","genitalia","penis","vagina"])
-with torch.no_grad():
-  text_features = clip_model.encode_text(text)
+safety_model = load_safety_model("ViT-B/32")
+clip_model, _, preprocess = open_clip.create_model_and_transforms('ViT-B-32', pretrained='openai')
 
 def run(prompt, steps, width, height, images, scale):
     opt = argparse.Namespace(
@@ -108,10 +155,13 @@ def run(prompt, steps, width, height, images, scale):
                     for x_sample in x_samples_ddim:
                         x_sample = 255. * rearrange(x_sample.cpu().numpy(), 'c h w -> h w c')
                         image_vector = Image.fromarray(x_sample.astype(np.uint8))
-                        image = preprocess(image_vector).unsqueeze(0)
-                        image_features = clip_model.encode_image(image)
-                        sims = image_features @ text_features.T
-                        if(sims.max()<18):
+                        image_preprocess = preprocess(image_vector).unsqueeze(0)
+                        with torch.no_grad():
+                          image_features = clip_model.encode_image(image_preprocess)
+                        image_features /= image_features.norm(dim=-1, keepdim=True)
+                        query = image_features.cpu().detach().numpy().astype("float32")
+                        unsafe = is_unsafe(safety_model,query,0.5)
+                        if(not unsafe):
                             all_samples_images.append(image_vector)
                         else:
                             return(None,None,"Sorry, potential NSFW content was detected on your outputs by our NSFW detection model. Try again with different prompts. If you feel your prompt was not supposed to give NSFW outputs, this may be due to a bias in the model. Read more about biases in the Biases Acknowledgment section below.")
