@@ -8,8 +8,9 @@ sys.path.append('./taming-transformers')
 sys.path.append('./latent-diffusion')
 from taming.models import vqgan 
 from ldm.util import instantiate_from_config
+from huggingface_hub import hf_hub_download
 
-torch.hub.download_url_to_file('https://ommer-lab.com/files/latent-diffusion/nitro/txt2img-f8-large/model.ckpt','txt2img-f8-large.ckpt')
+model_path_e = hf_hub_download(repo_id="multimodalart/compvis-latent-diffusion-text2img-large", filename="txt2img-f8-large.ckpt")
 
 #@title Import stuff
 import argparse, os, sys, glob
@@ -91,7 +92,7 @@ def is_unsafe(safety_model, embeddings, threshold=0.5):
     return True if x > threshold else False
 
 config = OmegaConf.load("latent-diffusion/configs/latent-diffusion/txt2img-1p4B-eval.yaml")
-model = load_model_from_config(config, f"txt2img-f8-large.ckpt")
+model = load_model_from_config(config,model_path_e)
 device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 model = model.to(device)
 
