@@ -9,7 +9,7 @@ sys.path.append('./latent-diffusion')
 from taming.models import vqgan 
 from ldm.util import instantiate_from_config
 
-torch.hub.download_url_to_file('http://batbot.ai/models/latent-diffusion/models/ldm/text2img-large/model.ckpt','txt2img-f8-large.ckpt')
+torch.hub.download_url_to_file('https://ommer-lab.com/files/latent-diffusion/nitro/txt2img-f8-large/model.ckpt','txt2img-f8-large.ckpt')
 
 #@title Import stuff
 import argparse, os, sys, glob
