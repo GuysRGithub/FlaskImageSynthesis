@@ -7,7 +7,7 @@ from omegaconf import OmegaConf
 from flask import Flask, jsonify, request, make_response, send_file
 import sys
 
-sys.path.append(".")
+sys.path.append("latent-diffusion")
 sys.path.append('./taming-transformers')
 sys.path.append('./latent-diffusion')
 from taming.models import vqgan
